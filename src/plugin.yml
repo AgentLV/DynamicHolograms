@@ -1,0 +1,8 @@
+name: Hologram
+main: de.agentlv.hologram.Hologram
+version: 1.0
+author: AgentLV
+
+commands:
+  doener:
+    usage: /doener
