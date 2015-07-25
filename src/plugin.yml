@@ -1,8 +1,4 @@
-name: Hologram
-main: de.agentlv.hologram.Hologram
+name: SneakHolo
+main: de.agentlv.sneakholo.SneakHolo
 version: 1.0
 author: AgentLV
-
-commands:
-  doener:
-    usage: /doener
