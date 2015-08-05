@@ -13,7 +13,7 @@ public interface NMSManager {
 	 * @param hologram
 	 * @return
 	 */
-	public Object createHologram(Hologram hologram);
+	public NMSHologram createHologram(Hologram hologram);
 	
 	/**
 	 * Creates a holoitem
