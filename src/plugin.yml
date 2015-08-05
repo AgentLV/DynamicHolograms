@@ -1,4 +1,4 @@
-name: SneakHolo
-main: de.agentlv.sneakholo.SneakHolo
-version: 1.0
+name: DynamicHolograms
+main: de.agentlv.dynamicholograms.DynamicHolograms
+version: 0.1
 author: AgentLV

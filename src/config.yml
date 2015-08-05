@@ -1,0 +1,13 @@
+# For more information visit the SneakHolo's page on SpigotMC.org!
+# Set this to true if you want that SneakHolo is only handled by other plugin's
+API_ONLY: false
+
+# Should the playersHead be shown on top of the hologram?
+playerHead: true
+
+# Distance between the holograms
+distance: 0.28
+
+text:
+- '%player%'
+- 'Your health: %health%'
