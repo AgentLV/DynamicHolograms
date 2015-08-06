@@ -9,7 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import de.agentlv.dynamicholograms.DynamicHolograms;
-import de.agentlv.dynamicholograms.nms.NMSManager;
+import de.agentlv.dynamicholograms.nms.NMSHologram;
 
 public class Hologram {
 
@@ -19,12 +19,12 @@ public class Hologram {
 	private Location location;
 	private double distance = 0.28;
 	private Set<Player> players = new HashSet<Player>();
-	private NMSManager nmsManager = DynamicHolograms.getNMSManager();
+	private NMSHologram nmsHologram = DynamicHolograms.getNMSHologram();
 	
 	public Hologram(Location location, String... message) {
 		this.location = location;
 		this.message.add(message[0]);
-		this.armorStands.add(nmsManager.createHologram(this));
+		this.armorStands.add(nmsHologram.create(this));
 		
 		for (int i = 1; i < message.length; ++i)
 			addMessage(message[i]);
@@ -34,7 +34,7 @@ public class Hologram {
 	public Hologram(Location location, double distance, String... message) {
 		this.location = location;
 		this.message.add(message[0]);
-		this.armorStands.add(nmsManager.createHologram(this));
+		this.armorStands.add(nmsHologram.create(this));
 		this.distance = distance;
 		
 		for (int i = 1; i < message.length; ++i)
@@ -43,23 +43,23 @@ public class Hologram {
 	
 	public void addMessage(String message) {	
 		this.message.add(message);
-		this.armorStands.add(nmsManager.hologramAddMessage(this, message));
+		this.armorStands.add(nmsHologram.addMessage(this, message));
 	}
 	
 	public void setMessage(int index, String message) {
 		this.message.set(index, message);
-		this.armorStands.set(index, nmsManager.hologramSetMessage(this, index, message));
+		this.armorStands.set(index, nmsHologram.setMessage(this, index, message));
 	}
 	
 	public void removeMessage(int index) {
-		nmsManager.hologramRemoveMessage(this, index);
+		nmsHologram.removeMessage(this, index);
 		this.armorStands.remove(index);
 		this.message.remove(index);
 	}
 	
 	public void setHoloItem(HoloItem holoItem) {
 		holoItem.setArmorStand(this.armorStands.get(0));
-		this.holoItem = nmsManager.hologramSetHoloItem(this, holoItem);
+		this.holoItem = nmsHologram.setHoloItem(this, holoItem);
 	}
 	
 	public void removeHoloItem() {
@@ -71,7 +71,7 @@ public class Hologram {
 	}
 	
 	public void moveHologram(Location location) {
-		nmsManager.moveHologram(this, location);
+		nmsHologram.move(this, location);
 	}
 	
 	public void setDistance(double distance) {
@@ -114,7 +114,7 @@ public class Hologram {
 		
 		for (Player p : player) {
 			this.players.add(p);
-			nmsManager.showPlayerHologram(this, p);
+			nmsHologram.showPlayer(this, p);
 		}
 		
 	}
@@ -123,7 +123,7 @@ public class Hologram {
 		
 		for (Player p : player) {
 			this.players.remove(p);
-			nmsManager.hidePlayerHologram(this, p);
+			nmsHologram.hidePlayer(this, p);
 		}
 	}
 	
@@ -132,7 +132,7 @@ public class Hologram {
 	}
 	
 	public void delete() {
-		nmsManager.removeHologram(this);
+		nmsHologram.remove(this);
 	}
 	
 }

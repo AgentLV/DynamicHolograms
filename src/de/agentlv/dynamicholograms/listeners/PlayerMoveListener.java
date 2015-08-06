@@ -5,14 +5,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import de.agentlv.dynamicholograms.DynamicHolograms;
-import de.agentlv.dynamicholograms.nms.NMSManager;
 import de.agentlv.dynamicholograms.objects.Hologram;
 
 public class PlayerMoveListener implements Listener {
 	
 	Hologram hologram;
 	
-	public PlayerMoveListener(DynamicHolograms plugin, NMSManager nmsManager) {
+	public PlayerMoveListener(DynamicHolograms plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 

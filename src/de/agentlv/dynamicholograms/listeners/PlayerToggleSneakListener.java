@@ -6,17 +6,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import de.agentlv.dynamicholograms.DynamicHolograms;
-import de.agentlv.dynamicholograms.nms.NMSManager;
 import de.agentlv.dynamicholograms.objects.HoloItem;
 import de.agentlv.dynamicholograms.objects.Hologram;
-import de.agentlv.dynamicholograms.objects.PlayerSkullData;
 
 public class PlayerToggleSneakListener implements Listener {
 	
 	public static Hologram hologram = null;
-	//HoloItem holoItem = null;
+	HoloItem holoItem = null;
 	
-	public PlayerToggleSneakListener(DynamicHolograms plugin, NMSManager nmsManager) {
+	public PlayerToggleSneakListener(DynamicHolograms plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
@@ -29,11 +27,11 @@ public class PlayerToggleSneakListener implements Listener {
 			hologram = new Hologram(p.getLocation(), "§aTEST");
 			hologram.show(p);
 		}
-		
+		/*
 		if (!e.isSneaking()) {
-			hologram.setHoloItem(new HoloItem("skullitem", hologram.getLocation()).setPlayerSkullData(new PlayerSkullData(p.getUniqueId(), p.getName())));
+			hologr
 		} else {
 			hologram.setHoloItem(new HoloItem("apple", hologram.getLocation()));
-		}
+		} */
 	}	
 }

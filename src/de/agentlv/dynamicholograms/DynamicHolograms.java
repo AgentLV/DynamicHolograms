@@ -7,10 +7,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import de.agentlv.dynamicholograms.listeners.PlayerMoveListener;
 import de.agentlv.dynamicholograms.listeners.PlayerToggleSneakListener;
-import de.agentlv.dynamicholograms.nms.NMSManager;
-import de.agentlv.dynamicholograms.nms.NmsManagerImpl_v1_8_R1;
-import de.agentlv.dynamicholograms.nms.NmsManagerImpl_v1_8_R2;
-import de.agentlv.dynamicholograms.nms.NmsManagerImpl_v1_8_R3;
+import de.agentlv.dynamicholograms.nms.NMSHoloItem;
+import de.agentlv.dynamicholograms.nms.NMSHologram;
 
 public final class DynamicHolograms extends JavaPlugin {
 	
@@ -19,7 +17,8 @@ public final class DynamicHolograms extends JavaPlugin {
 	public static boolean PLAYER_HEAD;
 	public static List<String> TEXT;
 	
-	private static NMSManager nmsManager;
+	private static NMSHologram nmsHologram;
+	private static NMSHoloItem nmsHoloItem;
 	
 	@Override
 	public void onEnable() {
@@ -29,34 +28,41 @@ public final class DynamicHolograms extends JavaPlugin {
 		API_ONLY = getConfig().getBoolean("API_ONLY", false);
 		
 		//Setup NMS and check if version is compatible
-		if (!setupNMSManager()) {
-			getLogger().severe("Failed to intialize NMS! SneakHolo supports 1.8 - 1.8.8!");
+		if (!setupNMS()) {
+			getLogger().severe("Failed to intialize NMS! DynamicHolograms supports 1.8 - 1.8.8!");
 			getServer().getPluginManager().disablePlugin(this);
 		}
 		
 		//Listener
 		if (!API_ONLY) {
-			new PlayerMoveListener(this, nmsManager);
-			new PlayerToggleSneakListener(this, nmsManager);
+			new PlayerMoveListener(this);
+			new PlayerToggleSneakListener(this);
 		}
 	}
 	
-	private boolean setupNMSManager() {
+	private boolean setupNMS() {
 
         String version = getNMSVersion();
 
         if (version.equals("v1_8_R1")) {
-        	nmsManager = new NmsManagerImpl_v1_8_R1();
+        	nmsHologram = new de.agentlv.dynamicholograms.nms.v1_8_R1.NmsHologramImpl();
+        	nmsHoloItem = new de.agentlv.dynamicholograms.nms.v1_8_R1.NmsHoloItemImpl();
         } else if (version.equals("v1_8_R2")) {
-        	nmsManager = new NmsManagerImpl_v1_8_R2();
+        	nmsHologram = new de.agentlv.dynamicholograms.nms.v1_8_R2.NmsHologramImpl();
+        	nmsHoloItem = new de.agentlv.dynamicholograms.nms.v1_8_R2.NmsHoloItemImpl();
         } else if (version.equals("v1_8_R3")) {
-        	nmsManager = new NmsManagerImpl_v1_8_R3();
+        	nmsHologram = new de.agentlv.dynamicholograms.nms.v1_8_R3.NmsHologramImpl();
+        	nmsHoloItem = new de.agentlv.dynamicholograms.nms.v1_8_R3.NmsHoloItemImpl();
         }
-        return nmsManager != null;
+        return nmsHologram != null && nmsHoloItem != null;
     }
 	
-	public static NMSManager getNMSManager() {
-		return nmsManager;
+	public static NMSHologram getNMSHologram() {
+		return nmsHologram;
+	}
+	
+	public static NMSHoloItem getNMSHoloItem() {
+		return nmsHoloItem;
 	}
 	
 	public static String getNMSVersion() {

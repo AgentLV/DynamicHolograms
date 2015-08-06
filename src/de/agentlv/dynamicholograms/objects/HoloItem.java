@@ -6,6 +6,9 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import de.agentlv.dynamicholograms.DynamicHolograms;
+import de.agentlv.dynamicholograms.nms.NMSHoloItem;
+
 public class HoloItem {
 
 	private Object item;
@@ -14,6 +17,7 @@ public class HoloItem {
 	private String itemName = "minecraft:";
 	private PlayerSkullData playerSkullData;
 	private Set<Player> players = new HashSet<Player>();
+	private NMSHoloItem nmsHoloItem = DynamicHolograms.getNMSHoloItem();
 	
 	public HoloItem() {
 		
@@ -22,12 +26,14 @@ public class HoloItem {
 	public HoloItem(String itemName, Location location) {
 		this.itemName += itemName.toLowerCase();
 		this.location = location;
+		nmsHoloItem.create(this);
 	}
 	
 	public HoloItem(Location location, PlayerSkullData playerSkullData) {
 		this.itemName = "skull";
 		this.location = location;
 		this.playerSkullData = playerSkullData;
+		nmsHoloItem.create(this);
 	}
 	
 	public void setItem(Object item) {
