@@ -59,19 +59,18 @@ public class Hologram {
 	
 	public void setHoloItem(HoloItem holoItem) {
 		holoItem.setArmorStand(this.armorStands.get(0));
-		this.holoItem = nmsHologram.setHoloItem(this, holoItem);
+		nmsHologram.setHoloItem(this, holoItem);
+		this.holoItem = holoItem;
 	}
 	
 	public void removeHoloItem() {
+		nmsHologram.removeHoloItem(this);
 		this.holoItem = null;
 	}
 	
-	public void setLocation(Location location) {
-		this.location = location;
-	}
-	
-	public void moveHologram(Location location) {
+	public void move(Location location) {
 		nmsHologram.move(this, location);
+		this.location = location;
 	}
 	
 	public void setDistance(double distance) {
@@ -116,7 +115,6 @@ public class Hologram {
 			this.players.add(p);
 			nmsHologram.showPlayer(this, p);
 		}
-		
 	}
 	
 	public void hide(Player... player) {

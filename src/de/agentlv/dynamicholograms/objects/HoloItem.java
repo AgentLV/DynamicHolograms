@@ -26,18 +26,14 @@ public class HoloItem {
 	public HoloItem(String itemName, Location location) {
 		this.itemName += itemName.toLowerCase();
 		this.location = location;
-		nmsHoloItem.create(this);
+		this.item = nmsHoloItem.create(this);
 	}
 	
 	public HoloItem(Location location, PlayerSkullData playerSkullData) {
 		this.itemName = "skull";
 		this.location = location;
 		this.playerSkullData = playerSkullData;
-		nmsHoloItem.create(this);
-	}
-	
-	public void setItem(Object item) {
-		this.item = item;
+		this.item = nmsHoloItem.create(this);
 	}
 	
 	public void setArmorStand(Object armorStand) {

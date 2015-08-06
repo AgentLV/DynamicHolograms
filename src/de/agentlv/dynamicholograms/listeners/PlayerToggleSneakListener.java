@@ -27,11 +27,11 @@ public class PlayerToggleSneakListener implements Listener {
 			hologram = new Hologram(p.getLocation(), "§aTEST");
 			hologram.show(p);
 		}
-		/*
+		
 		if (!e.isSneaking()) {
-			hologr
+			hologram.removeHoloItem();
 		} else {
 			hologram.setHoloItem(new HoloItem("apple", hologram.getLocation()));
-		} */
+		} 
 	}	
 }

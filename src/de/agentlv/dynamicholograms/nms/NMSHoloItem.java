@@ -11,7 +11,7 @@ public interface NMSHoloItem {
 	 * Create a holoitem
 	 * @param holoItem
 	 */
-	public void create(HoloItem holoItem);
+	public Object create(HoloItem holoItem);
 	
 	/**
 	 * Make a holoitem visible to a player

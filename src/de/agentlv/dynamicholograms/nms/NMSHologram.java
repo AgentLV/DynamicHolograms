@@ -62,7 +62,7 @@ public interface NMSHologram {
 	 * @param hologram
 	 * @param holoItem
 	 */
-	public HoloItem setHoloItem(Hologram hologram, HoloItem holoItem);
+	public void setHoloItem(Hologram hologram, HoloItem holoItem);
 	
 	/**
 	 * Remove the holoitem of a hologram

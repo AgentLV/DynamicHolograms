@@ -31,7 +31,7 @@ import de.agentlv.dynamicholograms.objects.PlayerSkullData;
 public class NmsHoloItemImpl implements NMSHoloItem {
 	
 	@Override
-	public void create(HoloItem holoItem) {
+	public Object create(HoloItem holoItem) {
 		
 		Location loc = holoItem.getLocation();
 		ItemStack nmsStack;
@@ -62,8 +62,6 @@ public class NmsHoloItemImpl implements NMSHoloItem {
 		EntityItem item = new EntityItem(((CraftWorld) loc.getWorld()).getHandle());
         item.setItemStack(nmsStack);
         item.setLocation(loc.getX(), loc.getY() + 1.5, loc.getZ(), loc.getYaw(), loc.getPitch());
-			
-        holoItem.setItem(item);
         
 		for (Player p : holoItem.getPlayers()) {
 			PlayerConnection playerConnection = ((CraftPlayer) p).getHandle().playerConnection;
@@ -78,6 +76,7 @@ public class NmsHoloItemImpl implements NMSHoloItem {
 			playerConnection.sendPacket(attachEntityPacket);
 		}
 		
+		return item;
 	}
 	
 	@Override
