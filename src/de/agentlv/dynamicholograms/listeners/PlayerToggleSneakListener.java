@@ -32,7 +32,7 @@ public class PlayerToggleSneakListener implements Listener {
 			Location loc = p.getLocation().toVector().add(p.getLocation().getDirection().multiply(3)).toLocation(p.getWorld());
 			
 			sneakMap.put(p, new Hologram(loc, DynamicHolograms.DISTANCE, DynamicHolograms.TEXT.toArray(new String[DynamicHolograms.TEXT.size()]))
-			.setItem(new HoloItem(loc, new PlayerSkullData(p.getUniqueId(), p.getName())).getItem()).show(p).addMessage("hi"));
+			.setItem(new HoloItem(loc, new PlayerSkullData(p.getUniqueId(), p.getName())).getItem()).show(p));
 			
 		} else {
 			sneakMap.get(p).delete();
