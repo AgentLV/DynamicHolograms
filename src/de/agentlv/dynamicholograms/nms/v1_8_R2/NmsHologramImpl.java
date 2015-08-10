@@ -81,46 +81,26 @@ public class NmsHologramImpl implements NMSHologram {
 	@Override
 	public void move(Hologram hologram, Location newLocation) {
 		
-		int distance = MathHelper.floor(hologram.getDistance() * 32.0D);
 		List<EntityArmorStand> armorStands = new ArrayList<EntityArmorStand>();
 		
 		for (Object as : hologram.getArmorStands())
 			armorStands.add((EntityArmorStand) as);
-
-		Location oldLocation = hologram.getLocation();
-		
-		int oldX = MathHelper.floor(oldLocation.getX() * 32.0D);
-        int oldY = MathHelper.floor(oldLocation.getY() * 32.0D);
-        int oldZ = MathHelper.floor(oldLocation.getZ() * 32.0D);
 		
 		int newX = MathHelper.floor(newLocation.getX() * 32.0D);
-        int newY = MathHelper.floor(newLocation.getY() * 32.0D);
         int newZ = MathHelper.floor(newLocation.getZ() * 32.0D);
-        
-        int dx = newX - oldX;
-        int dy = newY - oldY;
-        int dz = newZ - oldZ;
         
     	for (Player p : hologram.getPlayers()) {
         	for (int i = 0; i < armorStands.size(); ++i) {
 	        		
         		EntityArmorStand as = armorStands.get(i);
+        		double distance = i * hologram.getDistance();
+        		int newY = MathHelper.floor((newLocation.getY() - distance) * 32.0D);
         		
-        		if (dx >= -128 && dx < 128 && dy >= -128 && dy < 128 && dz >= -128 && dz < 128) {
-	        		
-					PacketPlayOutRelEntityMove packet = new PacketPlayOutRelEntityMove(as.getId(), (byte) dx, (byte) dy, 
-							(byte) dz, false);
-					((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-						
-        		} else {
-        	
-		        	PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(as.getId(), newX, newY - (i * distance), newZ, (
-		        			byte) newLocation.getYaw(), (byte) newLocation.getPitch(), false);
-		        	((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-		        	
-	        	}
-        		
-        		as.setLocation(newLocation.getX(), newLocation.getY() - (i * hologram.getDistance()), newLocation.getZ(),
+	        	PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(as.getId(), newX, newY, newZ, (
+	        			byte) newLocation.getYaw(), (byte) newLocation.getPitch(), false);
+	        	((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+		        
+        		as.setLocation(newLocation.getX(), newLocation.getY() - distance, newLocation.getZ(),
         				newLocation.getYaw(), newLocation.getPitch());
         		
         	}
