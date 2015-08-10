@@ -11,7 +11,7 @@ public interface NMSHoloItem {
 	 * Create a holoitem
 	 * @param holoItem
 	 */
-	public Object create(HoloItem holoItem);
+	public Object[] create(HoloItem holoItem);
 	
 	/**
 	 * Make a holoitem visible to a player
@@ -33,9 +33,11 @@ public interface NMSHoloItem {
 	public void move(HoloItem holoItem, Location newLocation);
 	
 	/**
-	 * Remove a holoitem
+	 * Set the item for the holoitem
 	 * @param holoItem
+	 * @param itemName
+	 * @param subId
 	 */
-	public void remove(HoloItem holoItem);
+	public Object setItem(HoloItem holoItem, String itemName, int subId);
 	
 }

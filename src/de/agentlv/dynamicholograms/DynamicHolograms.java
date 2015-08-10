@@ -1,8 +1,10 @@
 package de.agentlv.dynamicholograms;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.agentlv.dynamicholograms.listeners.PlayerMoveListener;
@@ -13,9 +15,10 @@ import de.agentlv.dynamicholograms.nms.NMSHologram;
 public final class DynamicHolograms extends JavaPlugin {
 	
 	//Config variables
-	private static boolean API_ONLY;
+	private static boolean SNEAKHOLO;
 	public static boolean PLAYER_HEAD;
-	public static List<String> TEXT;
+	public static double DISTANCE;
+	public static List<String> TEXT = new ArrayList<String>();
 	
 	private static NMSHologram nmsHologram;
 	private static NMSHoloItem nmsHoloItem;
@@ -25,7 +28,7 @@ public final class DynamicHolograms extends JavaPlugin {
 		
 		//Config stuff
 		this.saveDefaultConfig();
-		API_ONLY = getConfig().getBoolean("API_ONLY", false);
+		SNEAKHOLO = getConfig().getBoolean("sneakHolo", false);
 		
 		//Setup NMS and check if version is compatible
 		if (!setupNMS()) {
@@ -33,10 +36,17 @@ public final class DynamicHolograms extends JavaPlugin {
 			getServer().getPluginManager().disablePlugin(this);
 		}
 		
-		//Listener
-		if (!API_ONLY) {
+		//Non API stuff
+		if (SNEAKHOLO) {
+			
+			PLAYER_HEAD = getConfig().getBoolean("playerHead", true);
+			DISTANCE = getConfig().getDouble("distance", 0.28);
+			for (String s : getConfig().getStringList("text"))
+				TEXT.add(ChatColor.translateAlternateColorCodes('&', s));
+			
 			new PlayerMoveListener(this);
 			new PlayerToggleSneakListener(this);
+			
 		}
 	}
 	

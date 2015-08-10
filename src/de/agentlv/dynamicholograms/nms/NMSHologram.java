@@ -3,41 +3,41 @@ package de.agentlv.dynamicholograms.nms;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import de.agentlv.dynamicholograms.objects.HoloItem;
 import de.agentlv.dynamicholograms.objects.Hologram;
 
 public interface NMSHologram {
 
 	/**
-	 * Create a hologram
+	 * Create a Hologram
 	 * @param hologram
-	 * @return
+	 * @return first ArmorStand
 	 */
 	public Object create(Hologram hologram);
 	
 	/**
-	 * Make a hologram visible to a player
+	 * Make a Hologram visible to a player
 	 * @param hologram
 	 */
 	public void showPlayer(Hologram hologram, Player player);
 	
 	/**
-	 * Make a hologram invisible to a player
+	 * Make a Hologram invisible to a player
 	 * @param hologram
 	 */
 	public void hidePlayer(Hologram hologram, Player player);
 	
 	/**
-	 * Moves a hologram
+	 * Moves a Hologram
 	 * @param hologram
 	 * @param newLocation
 	 */
 	public void move(Hologram hologram, Location newLocation);
 	
 	/**
-	 * Add a message/line to a hologram 
+	 * Add a message/line to a Hologram 
 	 * @param hologram
 	 * @param object
+	 * @return ArmorStand for the the message
 	 */
 	public Object addMessage(Hologram hologram, String message);
 	
@@ -46,7 +46,7 @@ public interface NMSHologram {
 	 * @param hologram
 	 * @param index
 	 * @param message
-	 * @return
+	 * @return updated ArmorStand
 	 */
 	public Object setMessage(Hologram hologram, int index, String message);
 	
@@ -58,22 +58,24 @@ public interface NMSHologram {
 	public void removeMessage(Hologram hologram, int index);
 	
 	/**
-	 * Set a holoitem for the specified hologram
+	 * Set a Item for the specified Hologram
 	 * @param hologram
 	 * @param holoItem
 	 */
-	public void setHoloItem(Hologram hologram, HoloItem holoItem);
+	public void setItem(Hologram hologram, Object rawitem);
 	
 	/**
-	 * Remove the holoitem of a hologram
+	 * Remove the Items of a Hologram
 	 * @param hologram
 	 */
-	public void removeHoloItem(Hologram hologram);
+	public void removeItem(Hologram hologram);
 	
 	/**
-	 * Remove a hologram
+	 * Set the distance between the lines
 	 * @param hologram
+	 * @param distance
+	 * @return update armorstands
 	 */
-	public void remove(Hologram hologram);
+	public void setDistance(Hologram hologram, double distance);
 	
 }

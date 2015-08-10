@@ -21,7 +21,6 @@ import org.bukkit.craftbukkit.v1_8_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import de.agentlv.dynamicholograms.nms.NMSHologram;
-import de.agentlv.dynamicholograms.objects.HoloItem;
 import de.agentlv.dynamicholograms.objects.Hologram;
 
 public class NmsHologramImpl implements NMSHologram {
@@ -31,8 +30,8 @@ public class NmsHologramImpl implements NMSHologram {
 		
 		EntityArmorStand as = (EntityArmorStand) addMessage(hologram, hologram.getMessage(0));
 			
-		if (hologram.hasHoloItem())
-			setHoloItem(hologram, hologram.getHoloItem());
+		if (hologram.hasItem())
+			setItem(hologram, hologram.getItem());
 		
 		return as;
 	}
@@ -41,23 +40,22 @@ public class NmsHologramImpl implements NMSHologram {
 	public void showPlayer(Hologram hologram, Player player) {
 		
 		PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
-		EntityItem item = hologram.getHoloItem() == null ? null : (EntityItem) hologram.getHoloItem().getItem();
-		HoloItem holoItem = hologram.getHoloItem();
 		
 		for (Object as : hologram.getArmorStands()) {
 			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving((EntityArmorStand) as);
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 		}
 		
-		if (hologram.hasHoloItem()) {
+		if (hologram.hasItem()) {
 			
+			EntityItem item = (EntityItem) hologram.getItem();
 			PacketPlayOutSpawnEntity itemPacket = new PacketPlayOutSpawnEntity(item, 2, 0);
 			playerConnection.sendPacket(itemPacket);
 			
 			PacketPlayOutEntityMetadata itemMetaDataPacket = new PacketPlayOutEntityMetadata(item.getId(), item.getDataWatcher(), true);
 			playerConnection.sendPacket(itemMetaDataPacket);
 			
-			PacketPlayOutAttachEntity attachEntityPacket = new PacketPlayOutAttachEntity(0, item, (EntityArmorStand) holoItem.getArmorStand());
+			PacketPlayOutAttachEntity attachEntityPacket = new PacketPlayOutAttachEntity(0, item, (EntityArmorStand) hologram.getArmorStand(0));
 			playerConnection.sendPacket(attachEntityPacket);
 		}
 			
@@ -66,17 +64,24 @@ public class NmsHologramImpl implements NMSHologram {
 	@Override
 	public void hidePlayer(Hologram hologram, Player player) {
 		
-		for (Object as : hologram.getArmorStands()) {
-			PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(((EntityArmorStand) as).getId());
-			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
+		
+		if (hologram.hasItem()) {
+			PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(((EntityItem) hologram.getItem()).getId());
+			playerConnection.sendPacket(packet);
 		}
+		
+		for (Object as : hologram.getArmorStands()) {
+    		PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(((EntityArmorStand) as).getId());
+    		playerConnection.sendPacket(packet);
+    	}
+    	
 	}
-	
-	
 	
 	@Override
 	public void move(Hologram hologram, Location newLocation) {
 		
+		int distance = MathHelper.floor(hologram.getDistance() * 32.0D);
 		List<EntityArmorStand> armorStands = new ArrayList<EntityArmorStand>();
 		
 		for (Object as : hologram.getArmorStands())
@@ -96,34 +101,31 @@ public class NmsHologramImpl implements NMSHologram {
         int dy = newY - oldY;
         int dz = newZ - oldZ;
         
-        if (dx >= -128 && dx < 128 && dy >= -128 && dy < 128 && dz >= -128 && dz < 128) {
-           
-        	for (Player p : hologram.getPlayers()) {
-	        	for (EntityArmorStand as : armorStands) {
+    	for (Player p : hologram.getPlayers()) {
+        	for (int i = 0; i < armorStands.size(); ++i) {
+	        		
+        		EntityArmorStand as = armorStands.get(i);
+        		
+        		if (dx >= -128 && dx < 128 && dy >= -128 && dy < 128 && dz >= -128 && dz < 128) {
+	        		
 					PacketPlayOutRelEntityMove packet = new PacketPlayOutRelEntityMove(as.getId(), (byte) dx, (byte) dy, 
 							(byte) dz, false);
 					((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-	        	}
-        	}
+						
+        		} else {
         	
-        } else {
-        	
-        	int distance = MathHelper.floor(hologram.getDistance() * 32.0D);
-        	
-        	for (Player p : hologram.getPlayers()) {
-	        	for (EntityArmorStand as : armorStands) {
-		        	PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(as.getId(), newX, newY, newZ, (
+		        	PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(as.getId(), newX, newY - (i * distance), newZ, (
 		        			byte) newLocation.getYaw(), (byte) newLocation.getPitch(), false);
 		        	((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 		        	
-		        	newY -= distance;
 	        	}
+        		
+        		as.setLocation(newLocation.getX(), newLocation.getY() - (i * hologram.getDistance()), newLocation.getZ(),
+        				newLocation.getYaw(), newLocation.getPitch());
+        		
         	}
         }
-		
 	}
-	
-	
 	
 	@Override
 	public Object addMessage(Hologram hologram, String message) {
@@ -150,7 +152,6 @@ public class NmsHologramImpl implements NMSHologram {
 			as.setSmall(true);
 			as.setGravity(false);
 			as.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-			
 		}
 		
 		for (Player p : hologram.getPlayers()) {
@@ -159,11 +160,14 @@ public class NmsHologramImpl implements NMSHologram {
 		}
 		
 		return as;
-		
 	}
 	
 	@Override
 	public Object setMessage(Hologram hologram, int index, String message) {
+		
+		if (index >= hologram.getArmorStands().size())
+			throw new IndexOutOfBoundsException();
+		
 		EntityArmorStand as = (EntityArmorStand) hologram.getArmorStands().get(index);
 		
 		as.setCustomName(message);
@@ -177,6 +181,7 @@ public class NmsHologramImpl implements NMSHologram {
 	
 	@Override
 	public void removeMessage(Hologram hologram, int index) {
+		
 		EntityArmorStand removeArmorStand = (EntityArmorStand) hologram.getArmorStands().get(index);
 		List<Double> pos = new ArrayList<Double>();
 		
@@ -188,12 +193,25 @@ public class NmsHologramImpl implements NMSHologram {
 		for (int i = index + 1; i < hologram.getArmorStands().size(); ++i) {
 			EntityArmorStand as = (EntityArmorStand) hologram.getArmorStands().get(i);
 			EntityArmorStand oldAs = (EntityArmorStand) hologram.getArmorStands().get(i - 1);
-			int newY = MathHelper.floor(oldAs.locY * 32.0D) - MathHelper.floor(as.locY * 32.0D);
+			int dy = MathHelper.floor(oldAs.locY * 32.0D) - MathHelper.floor(as.locY * 32.0D);
 			
 			for (Player p : hologram.getPlayers()) {
-	        	PacketPlayOutRelEntityMove packet = new PacketPlayOutRelEntityMove(as.getId(), (byte) 0, (byte) newY, 
-						(byte) 0, false);
-				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+				
+				if (dy >= -128 && dy < 128) {
+				
+		        	PacketPlayOutRelEntityMove packet = new PacketPlayOutRelEntityMove(as.getId(), (byte) 0, (byte) dy, 
+							(byte) 0, false);
+					((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+					
+				} else {
+					
+					PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(as.getId(), 
+							MathHelper.floor(oldAs.locX * 32.0D), MathHelper.floor(oldAs.locY * 32.0D), 
+							MathHelper.floor(oldAs.locZ * 32.0D), (byte) as.yaw, (byte) as.pitch, false);
+					
+		        	((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+					
+				}
         	}
 			pos.add(oldAs.locY);
 		}
@@ -209,21 +227,23 @@ public class NmsHologramImpl implements NMSHologram {
 	}
 	
 	@Override
-	public void setHoloItem(Hologram hologram, HoloItem holoItem) {
+	public void setItem(Hologram hologram, Object rawitem) {
 		
-		EntityItem item = (EntityItem) holoItem.getItem();
-		EntityArmorStand as = (EntityArmorStand) holoItem.getArmorStand();
+		if (!(rawitem instanceof EntityItem))
+			throw new IllegalStateException("The item has to be a instance of EntityItem!");
 		
-        if (hologram.hasHoloItem()) {
-	    	EntityItem oldItem = (EntityItem) hologram.getHoloItem().getItem();
+		EntityItem item = (EntityItem) rawitem;
+		EntityArmorStand as = (EntityArmorStand) hologram.getArmorStand(0);
+		
+        if (hologram.hasItem()) {
+	    	EntityItem oldItem = (EntityItem) hologram.getItem();
 			
 			for (Player p : hologram.getPlayers()) {
 				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(oldItem.getId());
 				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 			}
         }
-	
-    
+        
 		for (Player p : hologram.getPlayers()) {
 			PlayerConnection playerConnection = ((CraftPlayer) p).getHandle().playerConnection;
 			
@@ -241,35 +261,46 @@ public class NmsHologramImpl implements NMSHologram {
 	}
 	
 	@Override
-	public void removeHoloItem(Hologram hologram) {
+	public void removeItem(Hologram hologram) {
 		
-		if (hologram.hasHoloItem()) {
+		if (hologram.hasItem()) {
 			
 			for (Player p : hologram.getPlayers()) {
-				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(((EntityItem) hologram.getHoloItem().getItem()).getId());
+				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(((EntityItem) hologram.getItem()).getId());
 				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 			}
 		}
 		
 	}
-
+	
 	@Override
-	public void remove(Hologram hologram) {
+	public void setDistance(Hologram hologram, double distance) {
 		
-		for (Player p : hologram.getPlayers()) {
+		List<EntityArmorStand> armorStands = new ArrayList<EntityArmorStand>();
+		Location loc = hologram.getLocation();
+		
+		for (Object as : hologram.getArmorStands())
+			armorStands.add((EntityArmorStand) as);
 			
-			PlayerConnection playerConnection = ((CraftPlayer) p).getHandle().playerConnection;
-			
-			if (hologram.hasHoloItem()) {
-				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(((EntityItem) hologram.getHoloItem().getItem()).getId());
-				playerConnection.sendPacket(packet);
-			}
-			
-			for (Object as : hologram.getArmorStands()) {
-        		PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(((EntityArmorStand) as).getId());
-        		playerConnection.sendPacket(packet);
+    	for (Player p : hologram.getPlayers()) {
+    		
+        	for (int i = 1; i < armorStands.size(); ++i) {
+        		
+        		EntityArmorStand beforeAs = armorStands.get(i - 1);
+        		EntityArmorStand as = armorStands.get(i);
+        	
+    			int newX = MathHelper.floor(loc.getX() * 32.0D);
+    	        int newY = MathHelper.floor((beforeAs.locY - distance) * 32.0D);
+    	        int newZ = MathHelper.floor(loc.getZ() * 32.0D);
+    		
+	        	PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(as.getId(), newX, newY, newZ, (
+	        			byte) as.yaw, (byte) as.pitch, false);
+	        	((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+        		
+	        	as.setLocation(as.locX, beforeAs.locY - distance, as.locZ, as.yaw, as.pitch);
         	}
     	}
+		
 	}
 
 }

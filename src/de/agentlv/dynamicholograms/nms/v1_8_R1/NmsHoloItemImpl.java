@@ -5,7 +5,6 @@ import net.minecraft.server.v1_8_R1.EntityItem;
 import net.minecraft.server.v1_8_R1.GameProfileSerializer;
 import net.minecraft.server.v1_8_R1.Item;
 import net.minecraft.server.v1_8_R1.ItemStack;
-import net.minecraft.server.v1_8_R1.Items;
 import net.minecraft.server.v1_8_R1.MathHelper;
 import net.minecraft.server.v1_8_R1.NBTTagCompound;
 import net.minecraft.server.v1_8_R1.PacketPlayOutAttachEntity;
@@ -31,10 +30,10 @@ import de.agentlv.dynamicholograms.objects.PlayerSkullData;
 public class NmsHoloItemImpl implements NMSHoloItem {
 	
 	@Override
-	public Object create(HoloItem holoItem) {
+	public Object[] create(HoloItem holoItem) {
 		
 		Location loc = holoItem.getLocation();
-		ItemStack nmsStack;
+		EntityItem item = (EntityItem) setItem(holoItem, holoItem.getItemName(), holoItem.getSubId());
 		
 		EntityArmorStand as = new EntityArmorStand(((CraftWorld) loc.getWorld()).getHandle());
 		as.setInvisible(true);
@@ -43,40 +42,8 @@ public class NmsHoloItemImpl implements NMSHoloItem {
 		as.setGravity(false);
 		as.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
 		
-		holoItem.setArmorStand(as);
-		
-		if (holoItem.isPlayerSkull()) {
-			
-			PlayerSkullData skullData = holoItem.getPlayerSkullData();
-			
-			nmsStack = new ItemStack(Items.SKULL, 1, 3);
-			nmsStack.setTag(new NBTTagCompound());
-			NBTTagCompound skullOwnerTag = new NBTTagCompound();
-			GameProfileSerializer.serialize(skullOwnerTag, new GameProfile(skullData.getUniqueId(), skullData.getPlayerName()));
-			nmsStack.getTag().set("SkullOwner", skullOwnerTag);
-		
-		} else {
-			nmsStack = new ItemStack(Item.d(holoItem.getItemName()));
-		}
-		
-		EntityItem item = new EntityItem(((CraftWorld) loc.getWorld()).getHandle());
-        item.setItemStack(nmsStack);
-        item.setLocation(loc.getX(), loc.getY() + 1.5, loc.getZ(), loc.getYaw(), loc.getPitch());
-        
-		for (Player p : holoItem.getPlayers()) {
-			PlayerConnection playerConnection = ((CraftPlayer) p).getHandle().playerConnection;
-			
-			PacketPlayOutSpawnEntity itemPacket = new PacketPlayOutSpawnEntity(item, 2, 0);
-			playerConnection.sendPacket(itemPacket);
-			
-			PacketPlayOutEntityMetadata itemMetaDataPacket = new PacketPlayOutEntityMetadata(item.getId(), item.getDataWatcher(), true);
-			playerConnection.sendPacket(itemMetaDataPacket);
-			
-			PacketPlayOutAttachEntity attachEntityPacket = new PacketPlayOutAttachEntity(0, item, as);
-			playerConnection.sendPacket(attachEntityPacket);
-		}
-		
-		return item;
+		Object[] ob = {item, as};
+		return ob;
 	}
 	
 	@Override
@@ -102,11 +69,13 @@ public class NmsHoloItemImpl implements NMSHoloItem {
 	
 	@Override
 	public void hidePlayer(HoloItem holoItem, Player player) {
-		PacketPlayOutEntityDestroy armorStandPacket = new PacketPlayOutEntityDestroy(((EntityArmorStand) holoItem.getArmorStand()).getId());
-		((CraftPlayer) player).getHandle().playerConnection.sendPacket(armorStandPacket);
 		
 		PacketPlayOutEntityDestroy itemPacket = new PacketPlayOutEntityDestroy(((EntityItem) holoItem.getItem()).getId());
 		((CraftPlayer) player).getHandle().playerConnection.sendPacket(itemPacket);
+		
+		PacketPlayOutEntityDestroy armorStandPacket = new PacketPlayOutEntityDestroy(((EntityArmorStand) holoItem.getArmorStand()).getId());
+		((CraftPlayer) player).getHandle().playerConnection.sendPacket(armorStandPacket);
+		
 	}
 	
 	@Override
@@ -143,18 +112,57 @@ public class NmsHoloItemImpl implements NMSHoloItem {
         	}   	
     	}
         
-        holoItem.setLocation(newLocation);
 	}
 	
 	@Override
-	public void remove(HoloItem holoItem) {
+	public Object setItem(HoloItem holoItem, String itemName, int subId) {
 		
-		for (Player p : holoItem.getPlayers()) {
-			PacketPlayOutEntityDestroy armorStandPacket = new PacketPlayOutEntityDestroy(((EntityArmorStand) holoItem.getArmorStand()).getId());
-			((CraftPlayer) p).getHandle().playerConnection.sendPacket(armorStandPacket);
+		Location loc = holoItem.getLocation();
+		ItemStack nmsStack = new ItemStack(Item.d(holoItem.getItemName()), 1, holoItem.getSubId());
+		EntityItem item = new EntityItem(((CraftWorld) loc.getWorld()).getHandle());
+		EntityArmorStand as = (EntityArmorStand) holoItem.getArmorStand();
+		EntityItem oldItem = (EntityItem) holoItem.getItem();
+		
+		if (holoItem.isPlayerSkull()) {
 			
-			PacketPlayOutEntityDestroy itemPacket = new PacketPlayOutEntityDestroy(((EntityItem) holoItem.getItem()).getId());
-			((CraftPlayer) p).getHandle().playerConnection.sendPacket(itemPacket);
+			PlayerSkullData skullData = holoItem.getPlayerSkullData();
+			
+			nmsStack.setTag(new NBTTagCompound());
+			NBTTagCompound skullOwnerTag = new NBTTagCompound();
+			GameProfileSerializer.serialize(skullOwnerTag, new GameProfile(skullData.getUniqueId(), skullData.getPlayerName()));
+			nmsStack.getTag().set("SkullOwner", skullOwnerTag);
+		
 		}
+		
+        item.setItemStack(nmsStack);
+        item.setLocation(loc.getX(), loc.getY() + 1.5, loc.getZ(), loc.getYaw(), loc.getPitch());
+		
+        if (oldItem != null) {
+			
+			for (Player p : holoItem.getPlayers()) {
+				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(oldItem.getId());
+				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+			}
+        }
+        
+        if (holoItem.getArmorStand() != null) {
+        	
+			for (Player p : holoItem.getPlayers()) {
+				PlayerConnection playerConnection = ((CraftPlayer) p).getHandle().playerConnection;
+				
+				PacketPlayOutSpawnEntity itemPacket = new PacketPlayOutSpawnEntity(item, 2, 0);
+				playerConnection.sendPacket(itemPacket);
+				
+				PacketPlayOutEntityMetadata itemMetaDataPacket = new PacketPlayOutEntityMetadata(item.getId(), item.getDataWatcher(), true);
+				playerConnection.sendPacket(itemMetaDataPacket);
+				
+				PacketPlayOutAttachEntity attachEntityPacket = new PacketPlayOutAttachEntity(0, item, as);
+				playerConnection.sendPacket(attachEntityPacket);
+				
+			}
+        }
+
+        return item;
 	}
+	
 }
