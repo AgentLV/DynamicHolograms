@@ -22,7 +22,7 @@ public class PlayerMoveListener implements Listener {
 		Player p = e.getPlayer();
 		
 		if (PlayerToggleSneakListener.sneakMap.containsKey(p))
-			PlayerToggleSneakListener.sneakMap.get(p).move(e.getTo().toVector().add(p.getLocation().getDirection().multiply(3)).toLocation(p.getWorld()));
+			PlayerToggleSneakListener.sneakMap.get(p).move(e.getTo().toVector().add(e.getTo().getDirection().multiply(3)).toLocation(e.getTo().getWorld()));
 		
 	}
 }
