@@ -1,11 +1,12 @@
-# For more information visit the DynamicHologram's page on SpigotMC.org!
-# Should DynamicHolograms show a hologram when a player sneaks and follow the player (as long as he sneaks)?
+# For more information visit the DynamicHologram's page https://www.spigotmc.org/resources/dynamicholograms.10765/
+
+# Should DynamicHolograms show a hologram when a player sneaks and follow the player as long as he sneaks?
 sneakHolo: false
 
-# Should the playersHead be shown on top of the hologram?
+# Should the players head be shown on top of the hologram?
 playerHead: true
 
-# Distance between the holograms
+# Distance between the hologram lines
 distance: 0.28
 
 text:

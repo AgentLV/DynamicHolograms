@@ -14,7 +14,6 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutEntityTeleport;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
 import net.minecraft.server.v1_8_R3.PlayerConnection;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntity.PacketPlayOutRelEntityMove;
 
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -81,37 +80,22 @@ public class NmsHoloItemImpl implements NMSHoloItem {
 	@Override
 	public void move(HoloItem holoItem, Location newLocation) {
 		
-		Location oldLocation = holoItem.getLocation();
-		
-		int oldX = MathHelper.floor(oldLocation.getX() * 32.0D);
-        int oldY = MathHelper.floor(oldLocation.getY() * 32.0D);
-        int oldZ = MathHelper.floor(oldLocation.getZ() * 32.0D);
+		EntityArmorStand as = (EntityArmorStand) holoItem.getArmorStand();
 		
 		int newX = MathHelper.floor(newLocation.getX() * 32.0D);
-        int newY = MathHelper.floor(newLocation.getY() * 32.0D);
-        int newZ = MathHelper.floor(newLocation.getZ() * 32.0D);
-        
-        int dx = newX - oldX;
-        int dy = newY - oldY;
-        int dz = newZ - oldZ;
-        
-        if (dx >= -128 && dx < 128 && dy >= -128 && dy < 128 && dz >= -128 && dz < 128) {
-           
-        	for (Player p : holoItem.getPlayers()) {
-	        	PacketPlayOutRelEntityMove packet = new PacketPlayOutRelEntityMove(((EntityArmorStand) holoItem.getArmorStand()).getId(), (byte) dx, (byte) dy, 
-						(byte) dz, false);
-				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-        	}
-        	
-        } else {
-        	
-        	for (Player p : holoItem.getPlayers()) {
-	        	PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(((EntityArmorStand) holoItem.getArmorStand()).getId(), newX, newY, newZ, 
-	        			(byte) newLocation.getYaw(), (byte) newLocation.getPitch(), false);
-	        	((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-        	}   	
-    	}
-        
+		int newY = MathHelper.floor(newLocation.getY() * 32.0D);
+		int newZ = MathHelper.floor(newLocation.getZ() * 32.0D);
+     
+		for (Player p : holoItem.getPlayers()) {
+			
+			PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(as.getId(), newX, newY, newZ, (
+        			byte) newLocation.getYaw(), (byte) newLocation.getPitch(), false);
+        	((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+	        
+		}
+		
+		as.setLocation(newLocation.getX(), newLocation.getY(), newLocation.getZ(), newLocation.getYaw(), newLocation.getPitch());
+		
 	}
 	
 	@Override
